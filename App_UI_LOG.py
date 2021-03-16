@@ -144,6 +144,19 @@ class Ui_MainWindow(object):
 "}")
         self.pushButton_Login.setObjectName("pushButton_Login")
         self.horizontalLayout_2.addWidget(self.pushButton_Login)
+        self.lineEdit_Addpad_show = QtWidgets.QLineEdit(self.Login)
+        self.lineEdit_Addpad_show.setGeometry(QtCore.QRect(320, 430, 171, 31))
+        self.lineEdit_Addpad_show.setStyleSheet("QLineEdit{ \n"
+" border-radius:15px;\n"
+" border-color: rgb(140, 140, 140);\n"
+" border-style: inset;\n"
+" border-width: 2px;\n"
+" background-color: rgb(255, 255, 255);\n"
+" font: 12pt \"Impact\";\n"
+" color: rgb(0, 0, 0);\n"
+" padding-left: 10px;\n"
+"}")
+        self.lineEdit_Addpad_show.setObjectName("lineEdit_Addpad_show")
         self.stackedWidget.addWidget(self.Login)
         self.Dashbord_page = QtWidgets.QWidget()
         self.Dashbord_page.setObjectName("Dashbord_page")
@@ -547,10 +560,6 @@ class Ui_MainWindow(object):
         self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-
-
-
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -597,13 +606,3 @@ class Ui_MainWindow(object):
         self.pushButton_EmployeeInfo_dash.setText(_translate("MainWindow", "Employee Information"))
         self.pushButton_Dashbord_dash.setText(_translate("MainWindow", "Dashbord"))
         self.pushButton_Config_table.setText(_translate("MainWindow", "Configulation"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
