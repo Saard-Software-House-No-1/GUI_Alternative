@@ -1,9 +1,10 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5 import QtWidgets
 
-
+import dataextraction.GetEmployeeInfo import getEmployeeInfo
 from App_UI_LOG import Ui_MainWindow
 
 class MainWindow:
@@ -28,9 +29,29 @@ class MainWindow:
     def Dashbord(self):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
-    def Employee(self):
+    def Employee(self,df):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Employee_page)
+
+        """
+            Get information in dataframe and add to QTableWidgets
+            
+            :Param
+            df (pandas.core.frame.DataFrame) : Exployee dataframe   
+            
+        """
+            em_df = getEmployeeInfo(df)
+
+            nRows = len(em_df.index)
+            nColumns = len(em_df.columns)
+            self.ui.tableWidget_information.setRowCount(nRows)
+            self.ui.tableWidget_information.setColumnCount(nColumns)
+
+            for row in range(nRows):
+                for column in range(nColumns):
+                    data = em_df.iloc[row,column]
+                    self.ui.tableWidget_information.setItem(row,column, QTableWidgetItem(data))
+
     def Config(self):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Config_page)
