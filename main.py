@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5 import QtWidgets
 
-import dataextraction.GetEmployeeInfo import getEmployeeInfo
+from dataextraction.GetEmployeeInfo import getEmployeeInfo
+from dataextraction.GetDashboardInfo import *
 from App_UI_LOG import Ui_MainWindow
 from ApiModule.TimeAttendaceAPI import *
 import os.path
@@ -31,7 +32,14 @@ class MainWindow:
             self.url.append(i)
         f.close()
 
-        
+        self.User = str(self.ui.lineEdit_Username.text())
+        self.Passwd = str(self.ui.lineEdit_Password.text())
+
+        global df_person_input , df_record_input
+        df_record_input = access_record('01/01/2020', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
+        df_person_input = get_persons(self.url,self.User,self.Passwd)
+        datetime_input = datetime.today().strftime("%Y/%m/%d")
+        self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
 
         self.ui.stackedWidget.setCurrentWidget(self.ui.Login)
         self.ui.pushButton_Dashbord_dash.clicked.connect(self.Dashbord)
@@ -83,7 +91,7 @@ class MainWindow:
     def log_in(self):
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
-        self.Log_Run()
+        # self.Log_Run()
         self.result_login = TimeAttendaceAPI.get_seria_no(self.url,self.User,self.Passwd)
 
 
@@ -110,7 +118,42 @@ class MainWindow:
         self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
         self.P=1
         
+    def create_piechart(self):
+        print(self.user)
+        series = QPieSeries()
+        series.append("Ontime", self.TimeShow['Ontime'])
+        series.append("Late", self.TimeShow['Late'])
+        series.append("OT", self.TimeShow['OT'])
+        series.append("Absence", self.TimeShow['Absence'])
 
+        slice = QPieSlice()
+        slice = series.slices()[0]
+        slice.setLabelVisible(True)
+        slice = series.slices()[1]
+        slice.setLabelVisible(True)
+        slice = series.slices()[2]
+        slice.setLabelVisible(True)
+        slice = series.slices()[3]
+        slice.setLabelVisible(True)
+
+        chart = QChart()
+        chart.legend().hide()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTitle("Daily")
+
+        chart.legend().setVisible(True)
+        chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().markers(series)[0].setLabel("Ontime")
+        chart.legend().markers(series)[1].setLabel("Late")
+        chart.legend().markers(series)[2].setLabel("OT")
+        chart.legend().markers(series)[3].setLabel("Absence")
+
+        chartview = QChartView(chart)
+        chartview.setRenderHint(QPainter.Antialiasing)
+
+        self.setCentralWidget(chartview)
 
 
 if __name__ == '__main__':
