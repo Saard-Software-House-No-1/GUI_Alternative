@@ -33,6 +33,13 @@ class MainWindow:
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Employee_page)
 
+        """
+            Get information in dataframe and add to QTableWidgets
+            
+            :Param
+            df (pandas.core.frame.DataFrame) : Exployee dataframe   
+            
+        """
             em_df = getEmployeeInfo(df)
 
             nRows = len(em_df.index)
