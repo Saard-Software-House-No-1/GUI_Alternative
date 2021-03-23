@@ -29,7 +29,7 @@ class MainWindow:
     def Dashbord(self):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
-    def Employee(self):
+    def Employee(self,df):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Employee_page)
 
