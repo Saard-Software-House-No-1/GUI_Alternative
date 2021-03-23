@@ -2,10 +2,9 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import QtWidgets
-sys.path.insert(1, 'D:/Work_Saard_SWH/API/ApiModule')
 # print(sys.path)
 from App_UI_LOG import Ui_MainWindow
-from TimeAttendaceAPI import *
+from ApiModule.TimeAttendaceAPI import *
 import os.path
 
 class MainWindow:
@@ -42,7 +41,7 @@ class MainWindow:
 
     def show(self):
         self.main_win.show()
-        self.s = ','
+        self.s = '\n'
         self.url_show = self.s.join(self.url)
         self.ui.lineEdit_Addpad_show.setText(self.url_show)
         print(self.url)
@@ -80,7 +79,7 @@ class MainWindow:
             f=open("url.txt","a+")
             f.write(self.url_input + '\n')
             f.close()
-            self.s = ','
+            self.s = '\n'
             self.url_show = self.s.join(self.url)
             self.ui.lineEdit_Addpad_show.setText(self.url_show)
 
