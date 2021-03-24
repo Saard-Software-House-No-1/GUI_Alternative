@@ -43,11 +43,7 @@ class MainWindow:
        
 
         # Test by CSV
-        # datetime_input = '2021/01/15'
-        # df_record_input = pd.read_csv('exportAceesRecord2.csv')
-        # df_person_input = pd.read_csv('exportGetPerson.csv')
-        # self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
-        # print(self.user)
+        
 
 
         # Show User
@@ -66,7 +62,12 @@ class MainWindow:
         self.main_win.show()
         self.s = '\n'
         self.url_show = self.s.join(self.url)
-        self.ui.lineEdit_Addpad_show.setText(self.url_show)
+        count = 0
+        for ip in self.url:
+            self.ui.comboBox_IP_PAD.addItem("")
+            self.ui.comboBox_IP_PAD.setItemText(count,ip)
+            count = count+1
+        # self.ui.lineEdit_Addpad_show.setText(self.url_show)
         print(self.url)
 
     def Dashbord(self):
@@ -83,32 +84,44 @@ class MainWindow:
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Report)
     def log_in(self):
-
+        global df_person_input , df_record_input
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
-        # self.Log_Run()
-        self.result_login = get_seria_no(self.url,self.User,self.Passwd)
-        global df_person_input , df_record_input
+        # Test CSV
+        datetime_input = '2021/01/15'
+        df_record_input = pd.read_csv('exportAceesRecord2.csv')
+        df_person_input = pd.read_csv('exportGetPerson.csv')
+        self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
+        print(self.user)
+        self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
+        self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
+        self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
+        self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
+        self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        self.Log_Run()
 
-        if self.result_login == True:
-        	df_record_input = access_record('01/02/2021', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
-        	df_person_input = get_persons(self.url,self.User,self.Passwd)
-        	print (df_person_input)
-        	datetime_input = datetime.today().strftime("%Y/%m/%d")
-        	# print (datetime_input)
-        	# datetime_input = '2021/03/24'
-        	self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
-        	print(self.user,self.TimeShow)
-        	self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
-        	self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
-        	self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
-        	self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
-        	self.ui.lcdNumber_ALL.setProperty("value", self.All)
-        	self.Log_Run()
+        # API Test
+
+        # self.result_login = get_seria_no(self.url,self.User,self.Passwd)
+        # if self.result_login == True:
+        # 	df_record_input = access_record('01/02/2021', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
+        # 	df_person_input = get_persons(self.url,self.User,self.Passwd)
+        # 	print (df_person_input)
+        # 	datetime_input = datetime.today().strftime("%Y/%m/%d")
+        # 	# print (datetime_input)
+        # 	# datetime_input = '2021/03/24'
+        # 	self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
+        # 	print(self.user,self.TimeShow)
+        # 	self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
+        # 	self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
+        # 	self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
+        # 	self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
+        # 	self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        # 	self.Log_Run()
          	
 
-        else:
-            self.P =0
+        # else:
+        #     self.P =0
         return df_record_input,df_person_input
 
     def Employee(self):
