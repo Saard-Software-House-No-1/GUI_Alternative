@@ -7,10 +7,12 @@ from PyQt5 import QtWidgets
 from PyQt5.QtChart import QChart, QChartView, QPieSeries, QPieSlice
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtCore import Qt
+
 from dataextraction.GetEmployeeInfo import getEmployeeInfo
 from dataextraction.GetDashboardInfo import *
+
 from App_UI_LOG import Ui_MainWindow
-from ApiModule.TimeAttendaceAPI import *
+# from ApiModule.TimeAttendaceAPI import *
 
 
 class MainWindow:
@@ -68,6 +70,8 @@ class MainWindow:
         self.ui.pushButton_Report_dash.clicked.connect(self.Report)
         self.ui.pushButton_Login.clicked.connect(self.log_in)
         self.ui.pushButton_Addpad.clicked.connect(self.Add_Pad)
+        self.ui.pushButton_CSV.clicked.connect(self.export_csv)
+
 
     def show(self):
         self.main_win.show()
@@ -89,7 +93,7 @@ class MainWindow:
                 Get information in dataframe and add to QTableWidgets
                 
                 :Param
-                df (pandas.core.frame.DataFrame) : Exployee dataframe   
+                df (pandas.core.frame.DataFrame) : person dataframe   
                 
             """
             em_df = getEmployeeInfo(df_person_input)
@@ -109,7 +113,20 @@ class MainWindow:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Config_page)
     def Report(self):
         if self.P == 1:
+
             self.ui.stackedWidget.setCurrentWidget(self.ui.Report)
+
+            em_df = getEmployeeInfo(df_person_input)
+            em_list = em_df['Name'].unique()
+
+            self.listEmployee = em_list.copy()
+
+            for i,j in enumerate(em_list):
+                self.listEmployee[i] = QtWidgets.QCheckBox(self.ui.scrollAreaWidgetContents)
+                self.ui.verticalLayout_2.addWidget(self.listEmployee[i])
+                self.listEmployee[i].setText(em_list[i])
+            
+            
     def log_in(self):
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
@@ -176,6 +193,15 @@ class MainWindow:
         chartview.setRenderHint(QPainter.Antialiasing)
 
         self.setCentralWidget(chartview)
+    
+    def export_csv(self):
+        
+        csv_checklist = []
+        
+        for i in self.listEmployee:
+            if(i.isChecked()):
+                csv_checklist.append(i.text())
+
 
 
 if __name__ == '__main__':
