@@ -4,9 +4,15 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5 import QtWidgets
-from PyQt5.QtChart import QChart, QChartView, QPieSeries, QPieSlice
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtCore import Qt
+from PyQt5.QtChart import (QAreaSeries, QBarSet, QChart, QChartView,
+                           QLineSeries, QPieSeries, QScatterSeries, QSplineSeries,
+                           QStackedBarSeries, QPieSlice)
+from PyQt5.QtCore import pyqtSlot, QPointF, Qt, QMargins
+from PyQt5.QtGui import QColor, QPainter, QPalette, QFont
+from PyQt5.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QHBoxLayout,
+                             QLabel, QSizePolicy, QWidget)
 from dataextraction.GetEmployeeInfo import getEmployeeInfo
 from dataextraction.GetDashboardInfo import *
 from App_UI_LOG import Ui_MainWindow
@@ -73,6 +79,16 @@ class MainWindow:
     def Dashbord(self):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
+            chartView = QChartView(self.create_piechart())
+            chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.ui.gridLayout_2.addWidget(chartView)
+            chartView2 = QChartView(self.create_piechart())
+            chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.ui.gridLayout_2.addWidget(chartView2)
+            chartView3 = QChartView(self.create_piechart())
+            chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.ui.gridLayout_2.addWidget(chartView3)
+            print ("Click")
 
 
    
@@ -166,22 +182,33 @@ class MainWindow:
         self.P=1
         
     def create_piechart(self):
-        print(self.user)
+        print(self.TimeShow)
+        self.TimeShowPercent = self.TimeShow
+        self.total = self.TimeShow['Ontime']+self.TimeShow['Late']+self.TimeShow['OT']+self.TimeShow['Absence']
+        print(self.total)
+        self.TimeShowPercent['Ontime'] = (self.TimeShowPercent['Ontime']*100) / self.total
+        self.TimeShowPercent['Late'] = (self.TimeShowPercent['Late']*100) / self.total
+        self.TimeShowPercent['OT'] = (self.TimeShowPercent['OT']*100) / self.total
+        self.TimeShowPercent['Absence'] = (self.TimeShowPercent['Absence']*100) / self.total
         series = QPieSeries()
-        series.append("Ontime", self.TimeShow['Ontime'])
-        series.append("Late", self.TimeShow['Late'])
-        series.append("OT", self.TimeShow['OT'])
-        series.append("Absence", self.TimeShow['Absence'])
+        series.append("Ontime", self.TimeShowPercent['Ontime'])
+        series.append("Late", self.TimeShowPercent['Late'])
+        series.append("OT", self.TimeShowPercent['OT'])
+        series.append("Absence", self.TimeShowPercent['Absence'])
 
         slice = QPieSlice()
         slice = series.slices()[0]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
         slice = series.slices()[1]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
         slice = series.slices()[2]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
         slice = series.slices()[3]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
 
         chart = QChart()
         chart.legend().hide()
@@ -189,22 +216,26 @@ class MainWindow:
         chart.createDefaultAxes()
         chart.setAnimationOptions(QChart.SeriesAnimations)
         chart.setTitle("Daily")
+        chart.setMargins(QMargins(0, 0, 0, 0))
+        # chart.setTitleFont(QFont('Arial', 5))
 
-        chart.legend().setVisible(True)
-        chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().setVisible(False)
+        # chart.legend().setAlignment(Qt.AlignBottom)
         chart.legend().markers(series)[0].setLabel("Ontime")
         chart.legend().markers(series)[1].setLabel("Late")
         chart.legend().markers(series)[2].setLabel("OT")
         chart.legend().markers(series)[3].setLabel("Absence")
+        return chart
 
-        chartview = QChartView(chart)
-        chartview.setRenderHint(QPainter.Antialiasing)
+        # chartview = QChartView(chart)
+        # chartview.setRenderHint(QPainter.Antialiasing)
 
-        self.setCentralWidget(chartview)
+        # self.setCentralWidget(chartview)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_win = MainWindow()
+    widget = Ui_MainWindow()
     main_win.show()
     sys.exit(app.exec_())
