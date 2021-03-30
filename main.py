@@ -43,19 +43,8 @@ class MainWindow:
 
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
+        self.click = 0
         
-        
-        
-       
-
-        # Test by CSV
-        
-
-
-        # Show User
-        
-
-
         self.ui.stackedWidget.setCurrentWidget(self.ui.Login)
         self.ui.pushButton_Dashbord_dash.clicked.connect(self.Dashbord)
         self.ui.pushButton_EmployeeInfo_dash.clicked.connect(self.Employee)
@@ -79,19 +68,7 @@ class MainWindow:
     def Dashbord(self):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
-            chartView = QChartView(self.create_piechart())
-            chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.ui.gridLayout_2.addWidget(chartView)
-            chartView2 = QChartView(self.create_piechart())
-            chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.ui.gridLayout_2.addWidget(chartView2)
-            chartView3 = QChartView(self.create_piechart())
-            chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.ui.gridLayout_2.addWidget(chartView3)
-            print ("Click")
 
-
-   
 
     def Config(self):
         if self.P == 1:
@@ -103,20 +80,47 @@ class MainWindow:
         global df_person_input , df_record_input
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
-        # Test CSV
+
+        ##### Test CSV #####
         datetime_input = '2021/01/15'
         df_record_input = pd.read_csv('exportAceesRecord2.csv')
         df_person_input = pd.read_csv('exportGetPerson.csv')
-        self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
-        print(self.user)
+        # Dailay Data
+        self.DailyTimeShow , self.user , self.Blacklist= daily_scan(df_record_input, df_person_input, datetime_input)
+        # Monthly Data (Function Pending)
+        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+        self.MonthlyShow = self.DailyTimeShow
+
+        # Yearly Data (Function Pending)
+        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+        self.YearlyShow = self.DailyTimeShow
+
+        print("blacklist:",self.Blacklist)
+        # Add Blacklist
+        self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
+        self.BlacklistShow = "\n".join(self.BlacklistText)
+        self.ui.label_blacklist.setText(self.BlacklistShow)
+        print(self.BlacklistShow)
+        # LCD Show user number
         self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
         self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
         self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
         self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
         self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        # Add PieChart
+        chartView = QChartView(self.Create_DailyPieChart())
+        chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(chartView)
+        chartView2 = QChartView(self.Create_MonthlyPieChart())
+        chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(chartView2)
+        chartView3 = QChartView(self.Create_YearlyPieChart())
+        chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(chartView3)
+        # Login
         self.Log_Run()
 
-        # API Test
+        ###### API Test ######
 
         # self.result_login = get_seria_no(self.url,self.User,self.Passwd)
         # if self.result_login == True:
@@ -125,19 +129,36 @@ class MainWindow:
         # 	print (df_person_input)
         # 	datetime_input = datetime.today().strftime("%Y/%m/%d")
         # 	# print (datetime_input)
-        # 	# datetime_input = '2021/03/24'
-        # 	self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
-        # 	print(self.user,self.TimeShow)
+        # # Daily Data
+        # 	self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input)
+        # 	print(self.user,self.DailyTimeShow,self.Blacklist)
+        # # Monthly Data
+        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+
+        # # Add Blacklist
+        #     self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
+        #     self.BlacklistShow = "\n".join(self.BlacklistText)
+        #     self.ui.label_blacklist.setText(self.BlacklistShow)
+        # # LCD Show user number
         # 	self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
         # 	self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
         # 	self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
         # 	self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
         # 	self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        # # Add PieChart
+        #     chartView = QChartView(self.Create_DailyPieChart())
+        #     chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView)
+        #     chartView2 = QChartView(self.Create_MonthlyPieChart())
+        #     chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView2)
+        #     chartView3 = QChartView(self.Create_YearlyPieChart())
+        #     chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView3)
         # 	self.Log_Run()
-         	
-
         # else:
         #     self.P =0
+
         return df_record_input,df_person_input
 
     def Employee(self):
@@ -181,20 +202,18 @@ class MainWindow:
         self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
         self.P=1
         
-    def create_piechart(self):
-        print(self.TimeShow)
-        self.TimeShowPercent = self.TimeShow
-        self.total = self.TimeShow['Ontime']+self.TimeShow['Late']+self.TimeShow['OT']+self.TimeShow['Absence']
-        print(self.total)
-        self.TimeShowPercent['Ontime'] = (self.TimeShowPercent['Ontime']*100) / self.total
-        self.TimeShowPercent['Late'] = (self.TimeShowPercent['Late']*100) / self.total
-        self.TimeShowPercent['OT'] = (self.TimeShowPercent['OT']*100) / self.total
-        self.TimeShowPercent['Absence'] = (self.TimeShowPercent['Absence']*100) / self.total
+    def Create_DailyPieChart(self):
+        self.DailyTimeShowPercent = self.DailyTimeShow
+        self.total = self.DailyTimeShow['Ontime']+self.DailyTimeShow['Late']+self.DailyTimeShow['OT']+self.DailyTimeShow['Absence']
+        self.DailyTimeShowPercent['Ontime'] = (self.DailyTimeShowPercent['Ontime']*100) / self.total
+        self.DailyTimeShowPercent['Late'] = (self.DailyTimeShowPercent['Late']*100) / self.total
+        self.DailyTimeShowPercent['OT'] = (self.DailyTimeShowPercent['OT']*100) / self.total
+        self.DailyTimeShowPercent['Absence'] = (self.DailyTimeShowPercent['Absence']*100) / self.total
         series = QPieSeries()
-        series.append("Ontime", self.TimeShowPercent['Ontime'])
-        series.append("Late", self.TimeShowPercent['Late'])
-        series.append("OT", self.TimeShowPercent['OT'])
-        series.append("Absence", self.TimeShowPercent['Absence'])
+        series.append("Ontime", self.DailyTimeShowPercent['Ontime'])
+        series.append("Late", self.DailyTimeShowPercent['Late'])
+        series.append("OT", self.DailyTimeShowPercent['OT'])
+        series.append("Absence", self.DailyTimeShowPercent['Absence'])
 
         slice = QPieSlice()
         slice = series.slices()[0]
@@ -227,11 +246,98 @@ class MainWindow:
         chart.legend().markers(series)[3].setLabel("Absence")
         return chart
 
-        # chartview = QChartView(chart)
-        # chartview.setRenderHint(QPainter.Antialiasing)
 
-        # self.setCentralWidget(chartview)
+    def Create_MonthlyPieChart(self):
+        print(self.MonthlyShow)
+        self.MonthlyTimeShowPercent = self.MonthlyShow
+        self.month_total = self.MonthlyShow['Ontime']+self.MonthlyShow['Late']+self.MonthlyShow['OT']+self.MonthlyShow['Absence']
+        print(self.total)
+        self.MonthlyTimeShowPercent['Ontime'] = (self.MonthlyTimeShowPercent['Ontime']*100) / self.month_total
+        self.MonthlyTimeShowPercent['Late'] = (self.MonthlyTimeShowPercent['Late']*100) / self.month_total
+        self.MonthlyTimeShowPercent['OT'] = (self.MonthlyTimeShowPercent['OT']*100) / self.month_total
+        self.MonthlyTimeShowPercent['Absence'] = (self.MonthlyTimeShowPercent['Absence']*100) / self.month_total
+        series = QPieSeries()
+        series.append("Ontime", self.MonthlyTimeShowPercent['Ontime'])
+        series.append("Late", self.MonthlyTimeShowPercent['Late'])
+        series.append("OT", self.MonthlyTimeShowPercent['OT'])
+        series.append("Absence", self.MonthlyTimeShowPercent['Absence'])
 
+        slice = QPieSlice()
+        slice = series.slices()[0]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[1]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[2]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[3]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+
+        chart = QChart()
+        chart.legend().hide()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTitle("Monthly")
+        chart.setMargins(QMargins(0, 0, 0, 0))
+        # chart.setTitleFont(QFont('Arial', 5))
+
+        chart.legend().setVisible(False)
+        # chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().markers(series)[0].setLabel("Ontime")
+        chart.legend().markers(series)[1].setLabel("Late")
+        chart.legend().markers(series)[2].setLabel("OT")
+        chart.legend().markers(series)[3].setLabel("Absence")
+        return chart
+
+    def Create_YearlyPieChart(self):
+        print(self.YearlyShow)
+        self.YearlyTimeShowPercent = self.YearlyShow
+        self.year_total = self.YearlyShow['Ontime']+self.YearlyShow['Late']+self.YearlyShow['OT']+self.YearlyShow['Absence']
+        print(self.total)
+        self.YearlyTimeShowPercent['Ontime'] = (self.YearlyTimeShowPercent['Ontime']*100) / self.year_total
+        self.YearlyTimeShowPercent['Late'] = (self.YearlyTimeShowPercent['Late']*100) / self.year_total
+        self.YearlyTimeShowPercent['OT'] = (self.YearlyTimeShowPercent['OT']*100) / self.year_total
+        self.YearlyTimeShowPercent['Absence'] = (self.YearlyTimeShowPercent['Absence']*100) / self.year_total
+        series = QPieSeries()
+        series.append("Ontime", self.YearlyTimeShowPercent['Ontime'])
+        series.append("Late", self.YearlyTimeShowPercent['Late'])
+        series.append("OT", self.YearlyTimeShowPercent['OT'])
+        series.append("Absence", self.YearlyTimeShowPercent['Absence'])
+
+        slice = QPieSlice()
+        slice = series.slices()[0]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[1]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[2]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[3]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+
+        chart = QChart()
+        chart.legend().hide()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTitle("Yearly")
+        chart.setMargins(QMargins(0, 0, 0, 0))
+        # chart.setTitleFont(QFont('Arial', 5))
+
+        chart.legend().setVisible(False)
+        # chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().markers(series)[0].setLabel("Ontime")
+        chart.legend().markers(series)[1].setLabel("Late")
+        chart.legend().markers(series)[2].setLabel("OT")
+        chart.legend().markers(series)[3].setLabel("Absence")
+        return chart
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
