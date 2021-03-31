@@ -82,14 +82,14 @@ class MainWindow:
         self.Passwd = str(self.ui.lineEdit_Password.text())
 
         ##### Test CSV #####
-        datetime_input = '2021/01/15'
+        datetime_input = '2021/02/15'
         df_record_input = pd.read_csv('exportAceesRecord2.csv')
         df_person_input = pd.read_csv('exportGetPerson.csv')
         # Dailay Data
-        self.DailyTimeShow , self.user , self.Blacklist= daily_scan(df_record_input, df_person_input, datetime_input)
+        self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input)
         # Monthly Data (Function Pending)
-        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
-        self.MonthlyShow = self.DailyTimeShow
+        self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+        # self.MonthlyShow = self.DailyTimeShow
 
         # Yearly Data (Function Pending)
         # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
@@ -193,10 +193,10 @@ class MainWindow:
             f=open("url.txt","a+")
             f.write(self.url_input + '\n')
             f.close()
-            self.s = '\n'
-            self.url_show = self.s.join(self.url)
-            self.ui.lineEdit_Addpad_show.setText(self.url_show)
-
+            self.ui.comboBox_IP_PAD.addItem("")
+            print(len(self.url),self.url_input)
+            self.ui.comboBox_IP_PAD.setItemText(len(self.url)-1,self.url_input)
+            
         
     def Log_Run(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
@@ -250,17 +250,17 @@ class MainWindow:
     def Create_MonthlyPieChart(self):
         print(self.MonthlyShow)
         self.MonthlyTimeShowPercent = self.MonthlyShow
-        self.month_total = self.MonthlyShow['Ontime']+self.MonthlyShow['Late']+self.MonthlyShow['OT']+self.MonthlyShow['Absence']
-        print(self.total)
-        self.MonthlyTimeShowPercent['Ontime'] = (self.MonthlyTimeShowPercent['Ontime']*100) / self.month_total
-        self.MonthlyTimeShowPercent['Late'] = (self.MonthlyTimeShowPercent['Late']*100) / self.month_total
-        self.MonthlyTimeShowPercent['OT'] = (self.MonthlyTimeShowPercent['OT']*100) / self.month_total
-        self.MonthlyTimeShowPercent['Absence'] = (self.MonthlyTimeShowPercent['Absence']*100) / self.month_total
+        # self.month_total = self.MonthlyShow['Ontime']+self.MonthlyShow['Late']+self.MonthlyShow['OT']+self.MonthlyShow['Absence']
+        # print(self.total)
+        # self.MonthlyTimeShowPercent['Ontime'] = (self.MonthlyTimeShowPercent['Ontime']*100) / self.month_total
+        # self.MonthlyTimeShowPercent['Late'] = (self.MonthlyTimeShowPercent['Late']*100) / self.month_total
+        # self.MonthlyTimeShowPercent['OT'] = (self.MonthlyTimeShowPercent['OT']*100) / self.month_total
+        # self.MonthlyTimeShowPercent['Absence'] = (self.MonthlyTimeShowPercent['Absence']*100) / self.month_total
         series = QPieSeries()
-        series.append("Ontime", self.MonthlyTimeShowPercent['Ontime'])
-        series.append("Late", self.MonthlyTimeShowPercent['Late'])
-        series.append("OT", self.MonthlyTimeShowPercent['OT'])
-        series.append("Absence", self.MonthlyTimeShowPercent['Absence'])
+        series.append("Ontime", float(self.MonthlyShow['Ontime']))
+        series.append("Late", float(self.MonthlyShow['Late']))
+        series.append("OT", float(self.MonthlyShow['OT']))
+        series.append("Absence", float(self.MonthlyShow['Absence']))
 
         slice = QPieSlice()
         slice = series.slices()[0]
