@@ -9,6 +9,13 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtChart import (QAreaSeries, QBarSet, QChart, QChartView,
+                           QLineSeries, QPieSeries, QScatterSeries, QSplineSeries,
+                           QStackedBarSeries)
+from PyQt5.QtCore import pyqtSlot, QPointF, Qt
+from PyQt5.QtGui import QColor, QPainter, QPalette
+from PyQt5.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QHBoxLayout,
+                             QLabel, QSizePolicy, QWidget)
 
 
 class Ui_MainWindow(object):
@@ -149,10 +156,6 @@ class Ui_MainWindow(object):
         self.comboBox_IP_PAD.setMinimumSize(QtCore.QSize(200, 28))
         self.comboBox_IP_PAD.setMaximumSize(QtCore.QSize(200, 28))
         self.comboBox_IP_PAD.setObjectName("comboBox_IP_PAD")
-        self.comboBox_IP_PAD.addItem("")
-        self.comboBox_IP_PAD.addItem("")
-        self.comboBox_IP_PAD.addItem("")
-        self.comboBox_IP_PAD.addItem("")
         self.stackedWidget.addWidget(self.Login)
         self.Dashbord_page = QtWidgets.QWidget()
         self.Dashbord_page.setObjectName("Dashbord_page")
@@ -187,7 +190,8 @@ class Ui_MainWindow(object):
         self.lcdNumber_ALL.setObjectName("lcdNumber_ALL")
         self.horizontalLayout.addWidget(self.lcdNumber_ALL)
         self.gridLayoutWidget = QtWidgets.QWidget(self.Dashbord_page)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(90, 150, 571, 231))
+        # self.gridLayoutWidget.setGeometry(QtCore.QRect(90, 150, 571, 231))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(30, 120, 700, 300))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout_2.setContentsMargins(0, 0, 0, 10)
@@ -195,17 +199,19 @@ class Ui_MainWindow(object):
         self.label_graph3_2 = QtWidgets.QLabel(self.gridLayoutWidget)
         self.label_graph3_2.setMinimumSize(QtCore.QSize(550, 210))
         self.label_graph3_2.setMaximumSize(QtCore.QSize(550, 210))
-        self.label_graph3_2.setStyleSheet("QLabel{ \n"
-" \n"
-" border-color: rgb(140, 140, 140);\n"
-" border-radius:15;\n"
-"    padding: 3px;\n"
-"    border-style: solid; \n"
-" border-width: 2px;\n"
-"}")
+#         self.label_graph3_2.setStyleSheet("QLabel{ \n"
+# " \n"
+# " border-color: rgb(140, 140, 140);\n"
+# " border-radius:15;\n"
+# "    padding: 3px;\n"
+# "    border-style: solid; \n"
+# " border-width: 2px;\n"
+# "}")
+        # self.baseLayout = QGridLayout()
         self.label_graph3_2.setText("")
         self.label_graph3_2.setObjectName("label_graph3_2")
-        self.gridLayout_2.addWidget(self.label_graph3_2, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.label_graph3_2, 0, 0, 0, 3)
+
         self.verticalLayoutWidget_2 = QtWidgets.QWidget(self.Dashbord_page)
         self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(90, 380, 571, 161))
         self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")

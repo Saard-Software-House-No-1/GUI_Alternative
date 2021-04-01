@@ -4,13 +4,18 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5 import QtWidgets
-from PyQt5.QtChart import QChart, QChartView, QPieSeries, QPieSlice
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtCore import Qt
-import datetime
-
+from PyQt5.QtChart import (QAreaSeries, QBarSet, QChart, QChartView,
+                           QLineSeries, QPieSeries, QScatterSeries, QSplineSeries,
+                           QStackedBarSeries, QPieSlice)
+from PyQt5.QtCore import pyqtSlot, QPointF, Qt, QMargins
+from PyQt5.QtGui import QColor, QPainter, QPalette, QFont
+from PyQt5.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QHBoxLayout,
+                             QLabel, QSizePolicy, QWidget)
 from dataextraction.GetEmployeeInfo import getEmployeeInfo
 from dataextraction.GetDashboardInfo import *
+import datetime
 
 from generate_csv.generate_csv import generate_csv
 
@@ -44,41 +49,8 @@ class MainWindow:
 
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
-
-        global df_person_input , df_record_input
+        self.click = 0
         
-        # df_record_input = access_record('01/01/2020', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
-        # df_person_input = get_persons(self.url,self.User,self.Passwd)
-        # datetime_input = datetime.today().strftime("%Y/%m/%d")
-        # self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
-
-        # Test by CSV
-        datetime_input = '2021/01/15'
-        df_record_input = pd.read_csv('exportAceesRecord2.csv')
-        df_person_input = pd.read_csv('exportGetPerson.csv')
-        self.TimeShow , self.user = daily_scan(df_record_input, df_person_input, datetime_input)
-        print(self.user)
-
-
-        # Show User
-        self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
-        self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
-        self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
-        self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
-        self.ui.lcdNumber_ALL.setProperty("value", self.All)
-
-
-        em_df = getEmployeeInfo(df_person_input)
-        em_list = em_df['Name'].unique()
-
-        self.listEmployee = em_list.copy()
-        for i,j in enumerate(em_list):
-            self.listEmployee[i] = QtWidgets.QCheckBox(self.ui.scrollAreaWidgetContents)
-            self.ui.verticalLayout_2.addWidget(self.listEmployee[i])
-            self.listEmployee[i].setChecked(False)
-            self.listEmployee[i].setText(em_list[i])
-
-
         self.ui.stackedWidget.setCurrentWidget(self.ui.Login)
         self.ui.pushButton_Dashbord_dash.clicked.connect(self.Dashbord)
         self.ui.pushButton_EmployeeInfo_dash.clicked.connect(self.Employee)
@@ -94,14 +66,118 @@ class MainWindow:
         self.main_win.show()
         self.s = '\n'
         self.url_show = self.s.join(self.url)
-        self.ui.lineEdit_Addpad_show.setText(self.url_show)
+        count = 0
+        for ip in self.url:
+            self.ui.comboBox_IP_PAD.addItem("")
+            self.ui.comboBox_IP_PAD.setItemText(count,ip)
+            count = count+1
+        # self.ui.lineEdit_Addpad_show.setText(self.url_show)
         print(self.url)
 
     def Dashbord(self):
         if self.P == 1:
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
-            
 
+    def Config(self):
+        if self.P == 1:
+            self.ui.stackedWidget.setCurrentWidget(self.ui.Config_page)
+            
+    def Report(self):
+        if self.P == 1:
+            self.ui.stackedWidget.setCurrentWidget(self.ui.Report)
+
+    def log_in(self):
+        global df_person_input , df_record_input
+        self.User = str(self.ui.lineEdit_Username.text())
+        self.Passwd = str(self.ui.lineEdit_Password.text())
+
+        ##### Test CSV #####
+        datetime_input = '2021/02/15'
+        df_record_input = pd.read_csv('exportAceesRecord2.csv')
+        df_person_input = pd.read_csv('exportGetPerson.csv')
+        # Dailay Data
+        self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input)
+        # Monthly Data (Function Pending)
+        self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+        # self.MonthlyShow = self.DailyTimeShow
+
+        # Yearly Data (Function Pending)
+        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+        self.YearlyShow = self.DailyTimeShow
+
+        print("blacklist:",self.Blacklist)
+        # Add Blacklist
+        self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
+        self.BlacklistShow = "\n".join(self.BlacklistText)
+        self.ui.label_blacklist.setText(self.BlacklistShow)
+        print(self.BlacklistShow)
+        # LCD Show user number
+        self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
+        self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
+        self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
+        self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
+        self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        # Add PieChart
+        chartView = QChartView(self.Create_DailyPieChart())
+        chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(chartView)
+        chartView2 = QChartView(self.Create_MonthlyPieChart())
+        chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(chartView2)
+        chartView3 = QChartView(self.Create_YearlyPieChart())
+        chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(chartView3)
+        # Login
+        self.Log_Run()
+
+        ###### API Test ######
+
+        # self.result_login = get_seria_no(self.url,self.User,self.Passwd)
+        # if self.result_login == True:
+        # 	df_record_input = access_record('01/02/2021', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
+        # 	df_person_input = get_persons(self.url,self.User,self.Passwd)
+        # 	print (df_person_input)
+        # 	datetime_input = datetime.today().strftime("%Y/%m/%d")
+        # 	# print (datetime_input)
+        # # Daily Data
+        # 	self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input)
+        # 	print(self.user,self.DailyTimeShow,self.Blacklist)
+        # # Monthly Data
+        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+
+        # # Add Blacklist
+        #     self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
+        #     self.BlacklistShow = "\n".join(self.BlacklistText)
+        #     self.ui.label_blacklist.setText(self.BlacklistShow)
+        # # LCD Show user number
+        # 	self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
+        # 	self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
+        # 	self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
+        # 	self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
+        # 	self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        # # Add PieChart
+        #     chartView = QChartView(self.Create_DailyPieChart())
+        #     chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView)
+        #     chartView2 = QChartView(self.Create_MonthlyPieChart())
+        #     chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView2)
+        #     chartView3 = QChartView(self.Create_YearlyPieChart())
+        #     chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView3)
+        # 	self.Log_Run()
+        # else:
+        #     self.P =0
+
+        em_df = getEmployeeInfo(df_person_input)
+        em_list = em_df['Name'].unique()
+
+        self.listEmployee = em_list.copy()
+        for i,j in enumerate(em_list):
+            self.listEmployee[i] = QtWidgets.QCheckBox(self.ui.scrollAreaWidgetContents)
+            self.ui.verticalLayout_2.addWidget(self.listEmployee[i])
+            self.listEmployee[i].setChecked(False)
+            self.listEmployee[i].setText(em_list[i])
 
     def Employee(self):
         if self.P == 1:
@@ -126,26 +202,6 @@ class MainWindow:
                     data = em_df.iloc[row,column]
                     self.ui.tableWidget_information.setItem(row,column, QTableWidgetItem(data))
 
-    def Config(self):
-        if self.P == 1:
-            self.ui.stackedWidget.setCurrentWidget(self.ui.Config_page)
-
-    def Report(self):
-        if self.P == 1:
-            self.ui.stackedWidget.setCurrentWidget(self.ui.Report)
-            
-    def log_in(self):
-        self.User = str(self.ui.lineEdit_Username.text())
-        self.Passwd = str(self.ui.lineEdit_Password.text())
-        self.Log_Run()
-        # self.result_login = TimeAttendaceAPI.get_seria_no(self.url,self.User,self.Passwd)
-
-
-        # if self.result_login == True:
-        #     self.Log_Run()
-        # else:
-        #     self.P =0
-
     def Add_Pad(self):
         self.url_input = str(self.ui.lineEdit_Addpad.text())
         self.exist = self.url_input in self.url
@@ -155,32 +211,41 @@ class MainWindow:
             f=open("url.txt","a+")
             f.write(self.url_input + '\n')
             f.close()
-            self.s = '\n'
-            self.url_show = self.s.join(self.url)
-            self.ui.lineEdit_Addpad_show.setText(self.url_show)
-
+            self.ui.comboBox_IP_PAD.addItem("")
+            print(len(self.url),self.url_input)
+            self.ui.comboBox_IP_PAD.setItemText(len(self.url)-1,self.url_input)
+            
         
     def Log_Run(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
         self.P=1
         
-    def create_piechart(self):
-        print(self.user)
+    def Create_DailyPieChart(self):
+        self.DailyTimeShowPercent = self.DailyTimeShow
+        self.total = self.DailyTimeShow['Ontime']+self.DailyTimeShow['Late']+self.DailyTimeShow['OT']+self.DailyTimeShow['Absence']
+        self.DailyTimeShowPercent['Ontime'] = (self.DailyTimeShowPercent['Ontime']*100) / self.total
+        self.DailyTimeShowPercent['Late'] = (self.DailyTimeShowPercent['Late']*100) / self.total
+        self.DailyTimeShowPercent['OT'] = (self.DailyTimeShowPercent['OT']*100) / self.total
+        self.DailyTimeShowPercent['Absence'] = (self.DailyTimeShowPercent['Absence']*100) / self.total
         series = QPieSeries()
-        series.append("Ontime", self.TimeShow['Ontime'])
-        series.append("Late", self.TimeShow['Late'])
-        series.append("OT", self.TimeShow['OT'])
-        series.append("Absence", self.TimeShow['Absence'])
+        series.append("Ontime", self.DailyTimeShowPercent['Ontime'])
+        series.append("Late", self.DailyTimeShowPercent['Late'])
+        series.append("OT", self.DailyTimeShowPercent['OT'])
+        series.append("Absence", self.DailyTimeShowPercent['Absence'])
 
         slice = QPieSlice()
         slice = series.slices()[0]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
         slice = series.slices()[1]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
         slice = series.slices()[2]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
         slice = series.slices()[3]
         slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
 
         chart = QChart()
         chart.legend().hide()
@@ -188,16 +253,109 @@ class MainWindow:
         chart.createDefaultAxes()
         chart.setAnimationOptions(QChart.SeriesAnimations)
         chart.setTitle("Daily")
+        chart.setMargins(QMargins(0, 0, 0, 0))
+        # chart.setTitleFont(QFont('Arial', 5))
 
-        chart.legend().setVisible(True)
-        chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().setVisible(False)
+        # chart.legend().setAlignment(Qt.AlignBottom)
         chart.legend().markers(series)[0].setLabel("Ontime")
         chart.legend().markers(series)[1].setLabel("Late")
         chart.legend().markers(series)[2].setLabel("OT")
         chart.legend().markers(series)[3].setLabel("Absence")
+        return chart
 
-        chartview = QChartView(chart)
-        chartview.setRenderHint(QPainter.Antialiasing)
+
+    def Create_MonthlyPieChart(self):
+        print(self.MonthlyShow)
+        self.MonthlyTimeShowPercent = self.MonthlyShow
+        # self.month_total = self.MonthlyShow['Ontime']+self.MonthlyShow['Late']+self.MonthlyShow['OT']+self.MonthlyShow['Absence']
+        # print(self.total)
+        # self.MonthlyTimeShowPercent['Ontime'] = (self.MonthlyTimeShowPercent['Ontime']*100) / self.month_total
+        # self.MonthlyTimeShowPercent['Late'] = (self.MonthlyTimeShowPercent['Late']*100) / self.month_total
+        # self.MonthlyTimeShowPercent['OT'] = (self.MonthlyTimeShowPercent['OT']*100) / self.month_total
+        # self.MonthlyTimeShowPercent['Absence'] = (self.MonthlyTimeShowPercent['Absence']*100) / self.month_total
+        series = QPieSeries()
+        series.append("Ontime", float(self.MonthlyShow['Ontime']))
+        series.append("Late", float(self.MonthlyShow['Late']))
+        series.append("OT", float(self.MonthlyShow['OT']))
+        series.append("Absence", float(self.MonthlyShow['Absence']))
+
+        slice = QPieSlice()
+        slice = series.slices()[0]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[1]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[2]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[3]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+
+        chart = QChart()
+        chart.legend().hide()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTitle("Monthly")
+        chart.setMargins(QMargins(0, 0, 0, 0))
+        # chart.setTitleFont(QFont('Arial', 5))
+
+        chart.legend().setVisible(False)
+        # chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().markers(series)[0].setLabel("Ontime")
+        chart.legend().markers(series)[1].setLabel("Late")
+        chart.legend().markers(series)[2].setLabel("OT")
+        chart.legend().markers(series)[3].setLabel("Absence")
+        return chart
+
+    def Create_YearlyPieChart(self):
+        print(self.YearlyShow)
+        self.YearlyTimeShowPercent = self.YearlyShow
+        self.year_total = self.YearlyShow['Ontime']+self.YearlyShow['Late']+self.YearlyShow['OT']+self.YearlyShow['Absence']
+        print(self.total)
+        self.YearlyTimeShowPercent['Ontime'] = (self.YearlyTimeShowPercent['Ontime']*100) / self.year_total
+        self.YearlyTimeShowPercent['Late'] = (self.YearlyTimeShowPercent['Late']*100) / self.year_total
+        self.YearlyTimeShowPercent['OT'] = (self.YearlyTimeShowPercent['OT']*100) / self.year_total
+        self.YearlyTimeShowPercent['Absence'] = (self.YearlyTimeShowPercent['Absence']*100) / self.year_total
+        series = QPieSeries()
+        series.append("Ontime", self.YearlyTimeShowPercent['Ontime'])
+        series.append("Late", self.YearlyTimeShowPercent['Late'])
+        series.append("OT", self.YearlyTimeShowPercent['OT'])
+        series.append("Absence", self.YearlyTimeShowPercent['Absence'])
+
+        slice = QPieSlice()
+        slice = series.slices()[0]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[1]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[2]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+        slice = series.slices()[3]
+        slice.setLabelVisible(True)
+        slice.setLabelFont(QFont('Arial', 7))
+
+        chart = QChart()
+        chart.legend().hide()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTitle("Yearly")
+        chart.setMargins(QMargins(0, 0, 0, 0))
+        # chart.setTitleFont(QFont('Arial', 5))
+
+        chart.legend().setVisible(False)
+        # chart.legend().setAlignment(Qt.AlignBottom)
+        chart.legend().markers(series)[0].setLabel("Ontime")
+        chart.legend().markers(series)[1].setLabel("Late")
+        chart.legend().markers(series)[2].setLabel("OT")
+        chart.legend().markers(series)[3].setLabel("Absence")
+        return chart
 
         self.setCentralWidget(chartview)
     
@@ -223,16 +381,16 @@ class MainWindow:
         print('csv_checklist = '+str(csv_checklist))
         if (self.ui.radioButton_personal.isChecked() and self.ui.radioButton_OT.isChecked()):
             print('personal and ot')
-            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,csv_checklist )
+            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,csv_checklist,isAllEmployee = False)
         elif (self.ui.radioButton_personal.isChecked() and self.ui.radioButton_Timeattendance.isChecked()):
             print('personal and time attendance')
-            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,csv_checklist )
+            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,csv_checklist,isAllEmployee = False)
         elif (self.ui.radioButton_Allemployee.isChecked() and self.ui.radioButton_OT.isChecked()):
             print('all employee and ot')
-            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,all_employee )
+            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,all_employee,isAllEmployee = True)
         elif(self.ui.radioButton_Allemployee.isChecked() and self.ui.radioButton_Timeattendance.isChecked()):
             print('all employee and time attendance')
-            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,all_employee )
+            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,all_employee,isAllEmployee = True)
 
 
     def setShift(self):
@@ -266,5 +424,6 @@ class MainWindow:
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_win = MainWindow()
+    widget = Ui_MainWindow()
     main_win.show()
     sys.exit(app.exec_())
