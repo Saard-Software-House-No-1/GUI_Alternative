@@ -60,16 +60,19 @@ class MainWindow:
         self.ui.pushButton_Addpad.clicked.connect(self.Add_Pad)
         self.ui.pushButton_CSV.clicked.connect(self.export_csv)
         self.ui.pushButton_Setshift_2.clicked.connect(self.setShift)
+        self.ui.pushButton_Removepad_2.clicked.connect(self.Remove_Pad)
 
 
     def show(self):
         self.main_win.show()
-        self.s = '\n'
-        self.url_show = self.s.join(self.url)
+        # self.s = '\n'
+        # self.url_show = self.s.join(self.url)
         count = 0
         for ip in self.url:
             self.ui.comboBox_IP_PAD.addItem("")
             self.ui.comboBox_IP_PAD.setItemText(count,ip)
+            self.ui.comboBox_2.addItem("")
+            self.ui.comboBox_2.setItemText(count,ip)
             count = count+1
         # self.ui.lineEdit_Addpad_show.setText(self.url_show)
         print(self.url)
@@ -208,12 +211,32 @@ class MainWindow:
         if self.exist == False:
             self.ui.lineEdit_Addpad.setText('')
             self.url.append(self.url_input)
-            f=open("url.txt","a+")
+            print(self.url)
+            f=open("URL.txt","a+")
             f.write(self.url_input + '\n')
             f.close()
             self.ui.comboBox_IP_PAD.addItem("")
-            print(len(self.url),self.url_input)
             self.ui.comboBox_IP_PAD.setItemText(len(self.url)-1,self.url_input)
+            self.ui.comboBox_2.addItem("")
+            self.ui.comboBox_2.setItemText(len(self.url)-1,self.url_input)
+
+    def Remove_Pad(self):
+        self.select = self.ui.comboBox_2.currentText()
+        self.select_index = self.url.index(self.select)
+        del self.url[self.select_index]
+        self.write = "\n".join(self.url)
+        f=open("URL.txt","w+")
+        f.write(self.write)
+        f.close()
+        self.ui.comboBox_IP_PAD.clear()
+        self.ui.comboBox_2.clear()
+        count = 0
+        for ip in self.url:
+            self.ui.comboBox_2.addItem("")
+            self.ui.comboBox_2.setItemText(count,ip)
+            count = count+1
+
+        print(self.write)
             
         
     def Log_Run(self):
