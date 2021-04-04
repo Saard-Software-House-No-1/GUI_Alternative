@@ -105,8 +105,8 @@ class MainWindow:
         # self.MonthlyShow = self.DailyTimeShow
 
         # Yearly Data (Function Pending)
-        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
-        self.YearlyShow = self.DailyTimeShow
+        self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input)
+        # self.YearlyShow = self.DailyTimeShow
 
         print("blacklist:",self.Blacklist)
         # Add Blacklist
@@ -147,7 +147,8 @@ class MainWindow:
         # 	print(self.user,self.DailyTimeShow,self.Blacklist)
         # # Monthly Data
         # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
-
+        # # Yearly Data (Function Pending)
+        # self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input)
         # # Add Blacklist
         #     self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
         #     self.BlacklistShow = "\n".join(self.BlacklistText)
@@ -211,7 +212,7 @@ class MainWindow:
         if self.exist == False:
             self.ui.lineEdit_Addpad.setText('')
             self.url.append(self.url_input)
-            print(self.url)
+            # print(self.url)
             f=open("URL.txt","a+")
             f.write(self.url_input + '\n')
             f.close()
@@ -236,7 +237,7 @@ class MainWindow:
             self.ui.comboBox_2.setItemText(count,ip)
             count = count+1
 
-        print(self.write)
+        # print(self.write)
             
         
     def Log_Run(self):
@@ -289,14 +290,6 @@ class MainWindow:
 
 
     def Create_MonthlyPieChart(self):
-        print(self.MonthlyShow)
-        self.MonthlyTimeShowPercent = self.MonthlyShow
-        # self.month_total = self.MonthlyShow['Ontime']+self.MonthlyShow['Late']+self.MonthlyShow['OT']+self.MonthlyShow['Absence']
-        # print(self.total)
-        # self.MonthlyTimeShowPercent['Ontime'] = (self.MonthlyTimeShowPercent['Ontime']*100) / self.month_total
-        # self.MonthlyTimeShowPercent['Late'] = (self.MonthlyTimeShowPercent['Late']*100) / self.month_total
-        # self.MonthlyTimeShowPercent['OT'] = (self.MonthlyTimeShowPercent['OT']*100) / self.month_total
-        # self.MonthlyTimeShowPercent['Absence'] = (self.MonthlyTimeShowPercent['Absence']*100) / self.month_total
         series = QPieSeries()
         series.append("Ontime", float(self.MonthlyShow['Ontime']))
         series.append("Late", float(self.MonthlyShow['Late']))
@@ -335,19 +328,12 @@ class MainWindow:
         return chart
 
     def Create_YearlyPieChart(self):
-        print(self.YearlyShow)
-        self.YearlyTimeShowPercent = self.YearlyShow
-        self.year_total = self.YearlyShow['Ontime']+self.YearlyShow['Late']+self.YearlyShow['OT']+self.YearlyShow['Absence']
-        print(self.total)
-        self.YearlyTimeShowPercent['Ontime'] = (self.YearlyTimeShowPercent['Ontime']*100) / self.year_total
-        self.YearlyTimeShowPercent['Late'] = (self.YearlyTimeShowPercent['Late']*100) / self.year_total
-        self.YearlyTimeShowPercent['OT'] = (self.YearlyTimeShowPercent['OT']*100) / self.year_total
-        self.YearlyTimeShowPercent['Absence'] = (self.YearlyTimeShowPercent['Absence']*100) / self.year_total
+        print("Yearly Show",self.YearlyShow)
         series = QPieSeries()
-        series.append("Ontime", self.YearlyTimeShowPercent['Ontime'])
-        series.append("Late", self.YearlyTimeShowPercent['Late'])
-        series.append("OT", self.YearlyTimeShowPercent['OT'])
-        series.append("Absence", self.YearlyTimeShowPercent['Absence'])
+        series.append("Ontime", float(self.YearlyShow['Ontime']))
+        series.append("Late", float(self.YearlyShow['Late']))
+        series.append("OT", float(self.YearlyShow['OT']))
+        series.append("Absence", float(self.YearlyShow['Absence']))
 
         slice = QPieSlice()
         slice = series.slices()[0]
@@ -380,7 +366,6 @@ class MainWindow:
         chart.legend().markers(series)[3].setLabel("Absence")
         return chart
 
-        self.setCentralWidget(chartview)
     
     def export_csv(self):
 
