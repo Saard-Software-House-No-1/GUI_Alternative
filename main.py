@@ -79,7 +79,34 @@ class MainWindow:
 
     def Dashbord(self):
         if self.P == 1:
+            datetime_input = '2021/02/15'
+
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
+
+            # Dailay Data
+            self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input,config_dict)
+            
+            # Monthly Data (Function Pending)
+            self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input,config_dict)
+
+            # Yearly Data (Function Pending)
+            self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input,config_dict)
+
+            self.chartViewNews = QChartView(self.Create_DailyPieChart())
+            self.chartViewNews.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.ui.gridLayout_2.replaceWidget(self.chartView,self.chartViewNews)
+            self.chartView = self.chartViewNews
+
+            self.chartViewNews2 = QChartView(self.Create_MonthlyPieChart())
+            self.chartViewNews2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.ui.gridLayout_2.replaceWidget(self.chartView2,self.chartViewNews2)
+            self.chartView2 = self.chartViewNews2
+
+            self.chartView3 = QChartView(self.Create_YearlyPieChart())
+            self.chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+            self.ui.gridLayout_2.replaceWidget(self.chartView3,self.chartView3)
+            self.chartView3 = self.chartViewNews3
+
 
     def Config(self):
         if self.P == 1:
@@ -99,13 +126,13 @@ class MainWindow:
         df_record_input = pd.read_csv('exportAceesRecord2.csv')
         df_person_input = pd.read_csv('exportGetPerson.csv')
         # Dailay Data
-        self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input)
+        self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input,config_dict)
         # Monthly Data (Function Pending)
-        self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
+        self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input,config_dict)
         # self.MonthlyShow = self.DailyTimeShow
 
         # Yearly Data (Function Pending)
-        self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input)
+        self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input,config_dict)
         # self.YearlyShow = self.DailyTimeShow
 
         print("blacklist:",self.Blacklist)
@@ -121,15 +148,15 @@ class MainWindow:
         self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
         self.ui.lcdNumber_ALL.setProperty("value", self.All)
         # Add PieChart
-        chartView = QChartView(self.Create_DailyPieChart())
-        chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.ui.gridLayout_2.addWidget(chartView)
-        chartView2 = QChartView(self.Create_MonthlyPieChart())
-        chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.ui.gridLayout_2.addWidget(chartView2)
-        chartView3 = QChartView(self.Create_YearlyPieChart())
-        chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.ui.gridLayout_2.addWidget(chartView3)
+        self.chartView = QChartView(self.Create_DailyPieChart())
+        self.chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(self.chartView)
+        self.chartView2 = QChartView(self.Create_MonthlyPieChart())
+        self.chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(self.chartView2)
+        self.chartView3 = QChartView(self.Create_YearlyPieChart())
+        self.chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.ui.gridLayout_2.addWidget(self.chartView3)
         # Login
         self.Log_Run()
 
