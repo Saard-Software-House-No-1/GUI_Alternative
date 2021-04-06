@@ -1,4 +1,5 @@
 import sys
+sys.path.append('../')
 import os.path
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
@@ -62,7 +63,8 @@ class MainWindow:
         self.ui.pushButton_Setshift_2.clicked.connect(self.setShift)
         self.ui.pushButton_Removepad_2.clicked.connect(self.Remove_Pad)
 
-
+        self.UPDATE_DASHBOARD = True
+        
     def show(self):
         self.main_win.show()
         # self.s = '\n'
@@ -79,34 +81,30 @@ class MainWindow:
 
     def Dashbord(self):
         if self.P == 1:
-            datetime_input = '2021/02/15'
-
             self.ui.stackedWidget.setCurrentWidget(self.ui.Dashbord_page)
 
-            # Dailay Data
-            self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input,config_dict)
-            
-            # Monthly Data (Function Pending)
-            self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input,config_dict)
-
-            # Yearly Data (Function Pending)
-            self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input,config_dict)
-
-            self.chartViewNews = QChartView(self.Create_DailyPieChart())
-            self.chartViewNews.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.ui.gridLayout_2.replaceWidget(self.chartView,self.chartViewNews)
-            self.chartView = self.chartViewNews
-
-            self.chartViewNews2 = QChartView(self.Create_MonthlyPieChart())
-            self.chartViewNews2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.ui.gridLayout_2.replaceWidget(self.chartView2,self.chartViewNews2)
-            self.chartView2 = self.chartViewNews2
-
-            self.chartView3 = QChartView(self.Create_YearlyPieChart())
-            self.chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.ui.gridLayout_2.replaceWidget(self.chartView3,self.chartView3)
-            self.chartView3 = self.chartViewNews3
-
+            if self.UPDATE_DASHBOARD == True:
+                # self.datetime_input = '2021/02/15'
+                self.UPDATE_DASHBOARD = False
+                # Dashboard Data
+                self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, self.datetime_input,config_dict)
+                self.MonthlyShow = monthly_scan(df_record_input, df_person_input, self.datetime_input, config_dict)
+                self.YearlyShow = yearly_scan(df_record_input, df_person_input, self.datetime_input, config_dict)
+                # 1
+                self.chartViewNews = QChartView(self.Create_DailyPieChart())
+                self.chartViewNews.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+                self.ui.gridLayout_2.replaceWidget(self.chartView,self.chartViewNews)
+                self.chartView = self.chartViewNews
+                # 2
+                self.chartViewNews2 = QChartView(self.Create_MonthlyPieChart())
+                self.chartViewNews2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+                self.ui.gridLayout_2.replaceWidget(self.chartView2,self.chartViewNews2)
+                self.chartView2 = self.chartViewNews2
+                # 3
+                self.chartViewNews3 = QChartView(self.Create_YearlyPieChart())
+                self.chartViewNews3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+                self.ui.gridLayout_2.replaceWidget(self.chartView3,self.chartViewNews3)
+                self.chartView3 = self.chartViewNews3
 
     def Config(self):
         if self.P == 1:
@@ -121,26 +119,58 @@ class MainWindow:
         self.User = str(self.ui.lineEdit_Username.text())
         self.Passwd = str(self.ui.lineEdit_Password.text())
 
-        ##### Test CSV #####
-        datetime_input = '2021/02/15'
+        ################## API Test ##################
+        # self.result_login = get_seria_no(self.url,self.User,self.Passwd)
+        # if self.result_login == True:
+        #     df_record_input = access_record('01/02/2021', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
+        #     df_person_input = get_persons(self.url,self.User,self.Passwd)
+        #     print (df_person_input)
+        #     self.datetime_input = datetime.today().strftime("%Y/%m/%d")
+        #     # print (self.datetime_input)
+        #     # Dashboard Data
+        #     self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, self.datetime_input, config_dict_input = config_dict)
+        #     self.MonthlyShow = monthly_scan(df_record_input, df_person_input, self.datetime_input, config_dict_input = config_dict)
+        #     self.YearlyShow = yearly_scan(df_record_input, df_person_input, self.datetime_input, config_dict_input = config_dict)
+        #     # Add Blacklist
+        #     self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
+        #     self.BlacklistShow = "\n".join(self.BlacklistText)
+        #     self.ui.label_blacklist.setText(self.BlacklistShow)
+        #     # LCD Show user number
+        #     self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
+        #     self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
+        #     self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
+        #     self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
+        #     self.ui.lcdNumber_ALL.setProperty("value", self.All)
+        #     # Add PieChart
+        #     chartView = QChartView(self.Create_DailyPieChart())
+        #     chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView)
+        #     chartView2 = QChartView(self.Create_MonthlyPieChart())
+        #     chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView2)
+        #     chartView3 = QChartView(self.Create_YearlyPieChart())
+        #     chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        #     self.ui.gridLayout_2.addWidget(chartView3)
+        #     self.Log_Run()
+        # else:
+        #     self.P =0
+
+        ################## Test CSV ##################
+        self.datetime_input = '2021/02/15'
         df_record_input = pd.read_csv('exportAceesRecord2.csv')
         df_person_input = pd.read_csv('exportGetPerson.csv')
         # Dailay Data
-        self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input,config_dict)
-        # Monthly Data (Function Pending)
-        self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input,config_dict)
-        # self.MonthlyShow = self.DailyTimeShow
-
-        # Yearly Data (Function Pending)
-        self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input,config_dict)
+        self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, self.datetime_input, config_dict_input = config_dict)
+        self.MonthlyShow = monthly_scan(df_record_input, df_person_input, self.datetime_input, config_dict_input = config_dict)
+        self.YearlyShow = yearly_scan(df_record_input, df_person_input, self.datetime_input, config_dict_input = config_dict)
         # self.YearlyShow = self.DailyTimeShow
-
-        print("blacklist:",self.Blacklist)
+        # self.MonthlyShow = self.DailyTimeShow
+        # print("blacklist:",self.Blacklist)
         # Add Blacklist
         self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
         self.BlacklistShow = "\n".join(self.BlacklistText)
         self.ui.label_blacklist.setText(self.BlacklistShow)
-        print(self.BlacklistShow)
+        # print(self.BlacklistShow)
         # LCD Show user number
         self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
         self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
@@ -159,46 +189,6 @@ class MainWindow:
         self.ui.gridLayout_2.addWidget(self.chartView3)
         # Login
         self.Log_Run()
-
-        ###### API Test ######
-
-        # self.result_login = get_seria_no(self.url,self.User,self.Passwd)
-        # if self.result_login == True:
-        # 	df_record_input = access_record('01/02/2021', datetime.today().strftime("%d/%m/%Y"),self.url,self.User,self.Passwd)
-        # 	df_person_input = get_persons(self.url,self.User,self.Passwd)
-        # 	print (df_person_input)
-        # 	datetime_input = datetime.today().strftime("%Y/%m/%d")
-        # 	# print (datetime_input)
-        # # Daily Data
-        # 	self.DailyTimeShow , self.user , self.Blacklist = daily_scan(df_record_input, df_person_input, datetime_input)
-        # 	print(self.user,self.DailyTimeShow,self.Blacklist)
-        # # Monthly Data
-        # self.MonthlyShow = monthly_scan(df_record_input, df_person_input, datetime_input)
-        # # Yearly Data (Function Pending)
-        # self.YearlyShow = yearly_scan(df_record_input, df_person_input, datetime_input)
-        # # Add Blacklist
-        #     self.BlacklistText = ["{} : {} ".format(key, value) for key, value in self.Blacklist.items()]
-        #     self.BlacklistShow = "\n".join(self.BlacklistText)
-        #     self.ui.label_blacklist.setText(self.BlacklistShow)
-        # # LCD Show user number
-        # 	self.ui.lcdNumber_Employee.setProperty("value", self.user['Employee'])
-        # 	self.ui.lcdNumber_Visito.setProperty("value", self.user['Visitor'])
-        # 	self.ui.lcdNumber_Blacklist.setProperty("value", self.user['Blacklist'])
-        # 	self.All = self.user['Employee']+self.user['Visitor']+self.user['Blacklist']
-        # 	self.ui.lcdNumber_ALL.setProperty("value", self.All)
-        # # Add PieChart
-        #     chartView = QChartView(self.Create_DailyPieChart())
-        #     chartView.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #     self.ui.gridLayout_2.addWidget(chartView)
-        #     chartView2 = QChartView(self.Create_MonthlyPieChart())
-        #     chartView2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #     self.ui.gridLayout_2.addWidget(chartView2)
-        #     chartView3 = QChartView(self.Create_YearlyPieChart())
-        #     chartView3.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #     self.ui.gridLayout_2.addWidget(chartView3)
-        # 	self.Log_Run()
-        # else:
-        #     self.P =0
 
         em_df = getEmployeeInfo(df_person_input)
         em_list = em_df['Name'].unique()
@@ -431,7 +421,7 @@ class MainWindow:
     def setShift(self):
 
         global config_dict 
-        
+        self.UPDATE_DASHBOARD = True
         
         shift_start = self.ui.timeEdit_start_config_2.text()
         shift_start_hour = int(shift_start.split(':')[0])
