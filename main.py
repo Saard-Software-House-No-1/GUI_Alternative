@@ -18,7 +18,8 @@ from dataextraction.GetEmployeeInfo import getEmployeeInfo
 from dataextraction.GetDashboardInfo import *
 import datetime
 
-from generate_csv.generate_csv import generate_csv
+from generate_report.generate_csv.generate_csv  import generate_csv
+from generate_report.generate_pdf.generate_pdf  import generate_pdf
 
 from App_UI_LOG import Ui_MainWindow
 from ApiModule.TimeAttendaceAPI import *
@@ -60,6 +61,7 @@ class MainWindow:
         self.ui.pushButton_Login.clicked.connect(self.log_in)
         self.ui.pushButton_Addpad.clicked.connect(self.Add_Pad)
         self.ui.pushButton_CSV.clicked.connect(self.export_csv)
+        self.ui.pushButton_PDF.clicked.connect(self.export_pdf)
         self.ui.pushButton_Setshift_2.clicked.connect(self.setShift)
         self.ui.pushButton_Removepad_2.clicked.connect(self.Remove_Pad)
 
@@ -388,14 +390,13 @@ class MainWindow:
 
         global config_dict 
 
-        csv_checklist = []
+        em_checklist = []
         all_employee = []
         
         for i in self.listEmployee:
-            print("person " + str(i.text()) + " ischeck " + str(i.isChecked()))
             if(i.isChecked()):
                 
-                csv_checklist.append(i.text())
+                em_checklist.append(i.text())
             all_employee.append(i.text())
 
         start_date = self.ui.dateEdit_start.text().split('/')
@@ -403,20 +404,43 @@ class MainWindow:
         end_date = self.ui.dateEdit_End.text().split('/')
         end_date_dt = datetime(year=int(end_date[2]), month=int(end_date[0]), day=int(end_date[1]))
 
-        print('csv_checklist = '+str(csv_checklist))
+
         if (self.ui.radioButton_personal.isChecked() and self.ui.radioButton_OT.isChecked()):
-            print('personal and ot')
-            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,csv_checklist,isAllEmployee = False)
+            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,em_checklist,isAllEmployee = False)
         elif (self.ui.radioButton_personal.isChecked() and self.ui.radioButton_Timeattendance.isChecked()):
-            print('personal and time attendance')
-            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,csv_checklist,isAllEmployee = False)
+            generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,em_checklist,isAllEmployee = False)
         elif (self.ui.radioButton_Allemployee.isChecked() and self.ui.radioButton_OT.isChecked()):
-            print('all employee and ot')
             generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,all_employee,isAllEmployee = True)
         elif(self.ui.radioButton_Allemployee.isChecked() and self.ui.radioButton_Timeattendance.isChecked()):
-            print('all employee and time attendance')
             generate_csv(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,all_employee,isAllEmployee = True)
 
+    def export_pdf(self):
+
+        global config_dict 
+
+        em_checklist = []
+        all_employee = []
+        
+        for i in self.listEmployee:
+            print("person " + str(i.text()) + " ischeck " + str(i.isChecked()))
+            if(i.isChecked()):
+                
+                em_checklist.append(i.text())
+            all_employee.append(i.text())
+
+        start_date = self.ui.dateEdit_start.text().split('/')
+        start_date_dt = datetime(year=int(start_date[2]), month=int(start_date[0]), day=int(start_date[1]))
+        end_date = self.ui.dateEdit_End.text().split('/')
+        end_date_dt = datetime(year=int(end_date[2]), month=int(end_date[0]), day=int(end_date[1]))
+
+        if (self.ui.radioButton_personal.isChecked() and self.ui.radioButton_OT.isChecked()):
+            generate_pdf(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,em_checklist,isAllEmployee = False)
+        elif (self.ui.radioButton_personal.isChecked() and self.ui.radioButton_Timeattendance.isChecked()):
+            generate_pdf(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,em_checklist,isAllEmployee = False)
+        elif (self.ui.radioButton_Allemployee.isChecked() and self.ui.radioButton_OT.isChecked()):
+            generate_pdf(df_record_input,df_person_input,start_date_dt,end_date_dt,'OT',config_dict,all_employee,isAllEmployee = True)
+        elif(self.ui.radioButton_Allemployee.isChecked() and self.ui.radioButton_Timeattendance.isChecked()):
+            generate_pdf(df_record_input,df_person_input,start_date_dt,end_date_dt,'Time attendance',config_dict,all_employee,isAllEmployee = True)
 
     def setShift(self):
 
